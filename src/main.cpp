@@ -1,13 +1,18 @@
+#include "utils/timer.hpp"
+
 int main (void) {
+    Timer timer;
+    timer.start();
     bool died = false;
     float score = 0.0f;
     float velocity = 1.0f;
     int player_row = 0;
     const float acceleration = 0.001f;
     while (true) {
+        double delta_time = timer.tick();
         if (!died) {
-            velocity += acceleration * time_elapsed();
-            score += velocity * time_elapsed();
+            velocity += acceleration * delta_time;
+            score += velocity * delta_time;
             spawn_enemies();
             spawn_powerups();
             update_entities();
