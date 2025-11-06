@@ -20,7 +20,7 @@ if (NOT raylib_FOUND)
         raylib
         URL https://github.com/raysan5/raylib/archive/refs/tags/5.5.tar.gz
         DOWNLOAD_EXTRACT_TIMESTAMP OFF
-        TIMEOUT 30
+        INACTIVITY_TIMEOUT 30
     )
     FetchContent_MakeAvailable(raylib)
 endif()
