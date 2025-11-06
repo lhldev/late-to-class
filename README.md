@@ -1,9 +1,9 @@
 # Requirements (Windows)
 Run this in Command Prompt or Windows Powershell to get the tools needed to compile
 ```bash
-winget install WinLibs cmake Git.Git
+winget install WinLibs cmake Git.Git ezwinports.make
 ```
-*Note you may need to restart your Command Prompt before proceding*
+*Note: you may need to restart your Command Prompt before proceding*
 
 # Compilation steps
 1. Download and extract this project
@@ -14,5 +14,5 @@ cmake -G "MinGW Makefiles" -S . -B build
 ```
 4. Compile and run the files
 ```bash
-make -C build run
+make -C build run -j $(nproc)
 ```
