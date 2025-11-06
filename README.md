@@ -8,11 +8,12 @@ winget install WinLibs cmake Git.Git ezwinports.make
 # Compilation steps
 1. Download and extract this project
 2. Open Command Prompt in this folder (Follow image)
-3. Run cmake to prepare the compilation using this command (You are only required to run this later on if you've changed the file structure)
-```bash
-cmake -G "MinGW Makefiles" -S . -B build
-```
+   <img src="assets/open_in_terminal.png" alt="Open in terminal" width="600"/>
+4. Run cmake to prepare the compilation using this command (You are only required to run this later on if you've changed the file structure)
+  ```bash
+  cmake -G "MinGW Makefiles" -S . -B build
+  ```
 4. Compile and run the files
-```bash
-make -C build run -j $(nproc)
-```
+  ```bash
+  make -C build run -j $(nproc)
+  ```
