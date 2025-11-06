@@ -17,3 +17,6 @@ winget install WinLibs cmake Git.Git ezwinports.make
   ```bash
   make -C build run -j $(nproc)
   ```
+# Info
+1. The c++ files are in src folder
+2. You can use any text editor to edit the c++ files
