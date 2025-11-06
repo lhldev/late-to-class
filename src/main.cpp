@@ -1,6 +1,8 @@
+#include <iostream>
+
 #include "utils/timer.hpp"
 
-int main (void) {
+int main(void) {
     Timer timer;
     timer.start();
     bool died = false;
@@ -13,40 +15,42 @@ int main (void) {
         if (!died) {
             velocity += acceleration * delta_time;
             score += velocity * delta_time;
-            spawn_enemies();
-            spawn_powerups();
-            update_entities();
-            if (collision()->type_id == ENEMY) {
-                died = true;
-            }
-            if (collision()->type_id == POWER_UPS) {
-                apply_powerups(collision());
-            }
-            switch (key_pressed()) {
-                case UP_ARROW:
-                    if (player_row < 1) {
-                        player_row++;
-                    }
-                    break;
-                case DOWN_ARROW:
-                    if (player_row > -1) {
-                        player_row--;
-                    }
-                    break;
-            }
+            // spawn_enemies();
+            // spawn_powerups();
+            // update_entities();
+            // if (collision()->type_id == ENEMY) {
+            //     died = true;
+            // }
+            // if (collision()->type_id == POWER_UPS) {
+            //     apply_powerups(collision());
+            // }
+            // switch (key_pressed()) {
+            //     case UP_ARROW:
+            //         if (player_row < 1) {
+            //             player_row++;
+            //         }
+            //         break;
+            //     case DOWN_ARROW:
+            //         if (player_row > -1) {
+            //             player_row--;
+            //         }
+            //         break;
+            // }
         }
-        else {
-            display("You died. Score: ", score);
-            display("Press any key to restart.");
-            if (key_pressed()) {
-                died = false;
-                score = 0.0f;
-                velocity = 1.0f;
-                acceleration = 0.001f;
-                player_row = 0;
-            }
-        }
-        render_screen();
+        // else {
+        //     display("You died. Score: ", score);
+        //     display("Press any key to restart.");
+        //     if (key_pressed()) {
+        //         died = false;
+        //         score = 0.0f;
+        //         velocity = 1.0f;
+        //         acceleration = 0.001f;
+        //         player_row = 0;
+        //     }
+        // }
+        // render_screen();
+
+        std::cout << "Hello world" << std::endl;
         return 0;
     }
 }

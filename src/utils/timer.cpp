@@ -2,9 +2,7 @@
 
 Timer::Timer() : is_running(false) {}
 
-void Timer::reset() {
-    is_running = false;
-}
+void Timer::reset() { is_running = false; }
 
 void Timer::start() {
     if (!is_running) {
@@ -20,7 +18,8 @@ double Timer::tick() {
 
     TimePoint current_time = Clock::now();
 
-    Seconds delta_time = std::chrono::duration_cast<Seconds>(current_time - last_tick_time);
+    Seconds delta_time =
+        std::chrono::duration_cast<Seconds>(current_time - last_tick_time);
 
     last_tick_time = current_time;
 
