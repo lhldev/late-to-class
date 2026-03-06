@@ -1,5 +1,5 @@
 #include <iostream>
-
+#include "raylib.h"
 #include "utils/timer.hpp"
 
 int main(void) {
@@ -51,6 +51,22 @@ int main(void) {
         // render_screen();
 
         std::cout << "Hello world" << std::endl;
+        InitWindow(800, 450, "Raylib Window");
+
+        SetTargetFPS(60);
+
+        while (!WindowShouldClose()) {
+            BeginDrawing();
+
+            ClearBackground(RAYWHITE);
+
+            DrawText("Congrats! You created a window.", 190, 200, 20, LIGHTGRAY);
+
+            EndDrawing();
+        }
+
+        CloseWindow();
+
         return 0;
     }
 }
