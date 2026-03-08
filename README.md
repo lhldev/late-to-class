@@ -13,8 +13,8 @@
 1. Click the Git tab
 2. Press the '+' icon to stage your files
 3. Enter a commit message inside the box
-4. Press the commit button
-5. Press sync button to push your changes
+4. Press the "Commit" button
+5. Press the "Sync" button to push your changes. Initial synchronization may require GitHub authentication; ensure you have been granted write access by requesting an invitation to the repository from me.
 <div align="center">
   <img src="assets/img/2inst.png" alt="Second instruction image" width="600"/>
 </div>
