@@ -1,17 +1,29 @@
 #include <iostream>
+
 #include "raylib.h"
-#include "utils/timer.hpp"
 
 int main(void) {
-    Timer timer;
-    timer.start();
     bool died = false;
     float score = 0.0f;
     float velocity = 1.0f;
     int player_row = 0;
     const float acceleration = 0.001f;
-    while (true) {
-        double delta_time = timer.tick();
+    std::cout << "Hello world" << std::endl;
+    InitWindow(800, 450, "Raylib Window");
+
+    SetTargetFPS(60);
+
+    while (!WindowShouldClose()) {
+        float delta_time = GetFrameTime();
+        BeginDrawing();
+
+        ClearBackground(RAYWHITE);
+
+        DrawText("Congrats! You created a window.", 190, 200, 20, LIGHTGRAY);
+        DrawText(TextFormat("Delta Time: %f", delta_time), 190, 250, 20, LIGHTGRAY);
+
+
+        EndDrawing();
         if (!died) {
             velocity += acceleration * delta_time;
             score += velocity * delta_time;
@@ -49,24 +61,9 @@ int main(void) {
         //     }
         // }
         // render_screen();
-
-        std::cout << "Hello world" << std::endl;
-        InitWindow(800, 450, "Raylib Window");
-
-        SetTargetFPS(60);
-
-        while (!WindowShouldClose()) {
-            BeginDrawing();
-
-            ClearBackground(RAYWHITE);
-
-            DrawText("Congrats! You created a window.", 190, 200, 20, LIGHTGRAY);
-
-            EndDrawing();
-        }
-
-        CloseWindow();
-
-        return 0;
     }
+
+    CloseWindow();
+
+    return 0;
 }
