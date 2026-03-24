@@ -5,7 +5,7 @@ echo Automated C++ and Raylib Environment Setup Tool
 echo ===================================================
 
 echo.
-echo [1/7] Verifying Windows Package Manager (winget) availability...
+echo [1/6] Verifying Windows Package Manager (winget) availability...
 where winget >nul 2>&1
 if %ERRORLEVEL% neq 0 (
     echo [Status] winget is missing. Bootstrapping via Microsoft.WinGet.Client module...
@@ -16,7 +16,7 @@ if %ERRORLEVEL% neq 0 (
 )
 
 echo.
-echo [2/7] Optimizing winget extraction parameters for virtualized environments...
+echo [2/6] Optimizing winget extraction parameters for virtualized environments...
 :: Establish the target directory for winget settings
 set "WINGET_SETTINGS_DIR=%LOCALAPPDATA%\Packages\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe\LocalState"
 if not exist "%WINGET_SETTINGS_DIR%" mkdir "%WINGET_SETTINGS_DIR%"
@@ -32,11 +32,11 @@ echo } >> "%WINGET_SETTINGS_FILE%"
 echo [Status] Configuration applied successfully.
 
 echo.
-echo [3/7] Installing dependencies and Visual Studio Code...
+echo [3/6] Installing dependencies and Visual Studio Code...
 winget install WinLibs cmake Git.Git ezwinports.make Microsoft.VisualStudioCode --accept-package-agreements --accept-source-agreements
 
 echo.
-echo [4/7] Refreshing environment variables for the current session...
+echo [4/6] Refreshing environment variables for the current session...
 :: Interrogate the Windows Registry for updated PATH variables
 for /f "tokens=2*" %%A in ('reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v Path 2^>nul') do set "SYS_PATH=%%B"
 for /f "tokens=2*" %%A in ('reg query "HKCU\Environment" /v Path 2^>nul') do set "USR_PATH=%%B"
@@ -47,20 +47,12 @@ set "PATH=%SYS_PATH%;%USR_PATH%;%PATH%"
 if not exist "git.exe" set "PATH=%ProgramFiles%\Git\cmd;%PATH%"
 
 echo.
-echo [5/7] Configuring Global Git Identity...
-set /p git_name="Please enter your First and Last Name for Git: "
-set /p git_email="Please enter your GitHub associated Email: "
-
-git config --global user.name "%git_name%"
-git config --global user.email "%git_email%"
-
-echo.
-echo [6/7] Cloning the repository...
+echo [5/6] Cloning the repository...
 set REPO_URL="https://github.com/lhldev/late-to-class"
 git clone %REPO_URL%
 
 echo.
-echo [7/7] Installing Visual Studio Code Extensions...
+echo [6/6] Installing Visual Studio Code Extensions...
 set "VSCODE_BIN=%LocalAppData%\Programs\Microsoft VS Code\bin\code.cmd"
 if not exist "%VSCODE_BIN%" set "VSCODE_BIN=%ProgramFiles%\Microsoft VS Code\bin\code.cmd"
 if not exist "%VSCODE_BIN%" set "VSCODE_BIN=%ProgramFiles(x86)%\Microsoft VS Code\bin\code.cmd"
