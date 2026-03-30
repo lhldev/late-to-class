@@ -5,8 +5,30 @@
 
 using namespace std;
 
-/* INFO
-In game development, the Y-coordinate usually increases as you move downward on the screen.
+/*
+*
+* COMMENTS
+*
+* Project Name: Late To Class!!
+* File Name:    main.cpp
+*
+* Description:
+* A 2D top-down arcade dodging game developed utilizing C++ and the Raylib library. 
+* The objective is to simulate a student rushing to class, navigating through 
+* three distinct lanes of traffic to avoid oncoming vehicles.
+*
+* Instructions & Controls:
+* - UP ARROW or 'W' Key   : Move the player character one lane up.
+* - DOWN ARROW or 'S' Key : Move the player character one lane down.
+* Gameplay Elements:
+* - Vehicles (Obstacles)  : Colliding with a vehicle ends the game immediately.
+* - Green Orbs (Power-ups): Collecting an orb grants a temporary shield 
+* (invulnerability for 2.3 seconds) and awards 3000 points.
+*
+* Post-Game:
+* - Restart: Press 'R', 'ENTER', or Left Mouse Click on the "YOU DIED" screen 
+* to reset the simulation and try again.
+*
 */
 
 // Lane goes from -1, 0, 1
@@ -64,9 +86,9 @@ int main(void) {
 
         if (!died) {
             if (IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_W)) {
-                if (player_row < 1) player_row++;
-            } else if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S)) {
                 if (player_row > -1) player_row--;
+            } else if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S)) {
+                if (player_row < 1) player_row++;
             }
 
             // Nonlinear acceleration curve to increase difficulty over time.
@@ -197,9 +219,10 @@ int main(void) {
             DrawRectangleRounded(carRect, 0.10f, 4, obstacleColors[i]);
         }
 
-        for (const Rectangle& p : powerups) {
-            DrawCircle(static_cast<int>(p.x + p.width / 2.0f), static_cast<int>(p.y + p.height / 2.0f), p.width * 0.5f, Color{86, 207, 94, 255});
-            DrawText("+", static_cast<int>(p.x + p.width * 0.28f), static_cast<int>(p.y - p.height * 0.08f), static_cast<int>(p.height * 0.92f), DARKGREEN);
+        // Pointer statement
+        for (const Rectangle *p = powerups.data(); p != powerups.data() + powerups.size(); p++) {
+            DrawCircle(static_cast<int>(p->x + p->width / 2.0f), static_cast<int>(p->y + p->height / 2.0f), p->width * 0.5f, Color{86, 207, 94, 255});
+            DrawText("+", static_cast<int>(p->x + p->width * 0.28f), static_cast<int>(p->y - p->height * 0.08f), static_cast<int>(p->height * 0.92f), DARKGREEN);
         }
 
         // Render UI components
