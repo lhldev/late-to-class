@@ -1,4 +1,3 @@
-#include <algorithm>
 #include <cmath>
 #include <vector>
 
@@ -6,18 +5,12 @@
 
 using namespace std;
 
-struct Obstacle {
-    Rectangle rect;
-    Color color;
-};
-
-/*
-INFO
-In game development, the Y-coordinate usually increases as you move downward on the
+/* INFO
+In game development, the Y-coordinate usually increases as you move downward on the screen.
 */
 
-// Lane go from -1, 0, 1
-// -1 represent the top row
+// Lane goes from -1, 0, 1
+// -1 represents the top row
 float LaneToY(int lane, float roadTop, float laneHeight, float objectHeight) {
     const int laneIndex = lane + 1;
     return roadTop + laneHeight * laneIndex + (laneHeight - objectHeight) * 0.5f;
@@ -38,7 +31,8 @@ int main(void) {
     float velocity = 370.0f;
     int player_row = 0;
 
-    vector<Obstacle> obstacles;
+    vector<Rectangle> obstacleRects;
+    vector<Color> obstacleColors;
     vector<Rectangle> powerups;
 
     float obstacleSpawnTimer = 0.0f;
@@ -51,23 +45,22 @@ int main(void) {
 
     const int carPaletteSize = 8;
     const Color carPalette[carPaletteSize] = {
-        Color{255, 45, 45, 255}, Color{17, 102, 255, 255}, Color{255, 145, 30, 255}, Color{32, 196, 84, 255},
-        Color{170, 67, 255, 255}, Color{255, 211, 61, 255}, Color{242, 82, 121, 255}, Color{31, 187, 185, 255}};
+        Color{255, 45, 45, 255}, Color{17, 102, 255, 255},
+        Color{255, 145, 30, 255}, Color{32, 196, 84, 255},
+        Color{170, 67, 255, 255}, Color{255, 211, 61, 255},
+        Color{242, 82, 121, 255}, Color{31, 187, 185, 255}};
 
     const float grassBandHeight = static_cast<float>(screenHeight) * 0.15f;
     const float roadTop = grassBandHeight;
     const float roadHeight = static_cast<float>(screenHeight) - (grassBandHeight * 2.0f);
     const float laneHeight = roadHeight / 3.0f;
     const float playerX = static_cast<float>(screenWidth) * 0.14f;
+
     float delta_time;
     while (!WindowShouldClose()) {
         delta_time = GetFrameTime();
 
-        const Rectangle playerRect{
-            playerX,
-            LaneToY(player_row, roadTop, laneHeight, playerSize),
-            playerSize,
-            playerSize};
+        const Rectangle playerRect{playerX, LaneToY(player_row, roadTop, laneHeight, playerSize), playerSize, playerSize};
 
         if (!died) {
             if (IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_W)) {
@@ -94,8 +87,10 @@ int main(void) {
                 const int lane = GetRandomValue(-1, 1);
                 const float carHeight = laneHeight * 0.56f;
                 const float carWidth = carHeight * 1.34f;
-                obstacles.push_back({Rectangle{static_cast<float>(screenWidth) + 40.0f, LaneToY(lane, roadTop, laneHeight, carHeight), carWidth, carHeight},
-                                     carPalette[GetRandomValue(0, carPaletteSize - 1)]});
+
+                obstacleRects.push_back(Rectangle{static_cast<float>(screenWidth) + 40.0f,
+                                                  LaneToY(lane, roadTop, laneHeight, carHeight), carWidth, carHeight});
+                obstacleColors.push_back(carPalette[GetRandomValue(0, carPaletteSize - 1)]);
             }
 
             if (powerupSpawnTimer >= powerupSpawnInterval) {
@@ -103,36 +98,45 @@ int main(void) {
                 if (GetRandomValue(0, 99) < 55) {
                     const int lane = GetRandomValue(-1, 1);
                     const float orbSize = laneHeight * 0.31f;
-                    powerups.push_back({Rectangle{static_cast<float>(screenWidth) + 40.0f, LaneToY(lane, roadTop, laneHeight, orbSize), orbSize, orbSize}});
+                    powerups.push_back({Rectangle{static_cast<float>(screenWidth) + 40.0f,
+                                                  LaneToY(lane, roadTop, laneHeight, orbSize), orbSize, orbSize}});
                 }
             }
 
-            for (Obstacle &o : obstacles) o.rect.x -= velocity * delta_time;
-            for (Rectangle &p : powerups) p.x -= velocity * delta_time * 0.9f;
+            for (size_t i = 0; i < obstacleRects.size(); i++) {
+                obstacleRects[i].x -= velocity * delta_time;
+            }
+            for (size_t i = 0; i < powerups.size(); i++) {
+                powerups[i].x -= velocity * delta_time * 0.9f;
+            }
 
-            // Remove if out of screen
-            obstacles.erase(
-                remove_if(obstacles.begin(), obstacles.end(),
-                          [](const Obstacle &o) { return o.rect.x + o.rect.width < 0.0f; }),
-                obstacles.end());
-            powerups.erase(
-                remove_if(powerups.begin(), powerups.end(),
-                          [](const Rectangle &p) { return p.x + p.width < 0.0f; }),
-                powerups.end());
+            // Removing entities when out of screen
+            // Backward iteration because we are erasing a vector that we are currently looping
+            for (int i = static_cast<int>(obstacleRects.size()) - 1; i >= 0; i--) {
+                if (obstacleRects[i].x + obstacleRects[i].width < 0.0f) {
+                    obstacleRects.erase(obstacleRects.begin() + i);
+                    obstacleColors.erase(obstacleColors.begin() + i);
+                }
+            }
+
+            for (int i = static_cast<int>(powerups.size()) - 1; i >= 0; i--) {
+                if (powerups[i].x + powerups[i].width < 0.0f) {
+                    powerups.erase(powerups.begin() + i);
+                }
+            }
 
             if (invulnerableTimer > 0.0f) invulnerableTimer -= delta_time;
 
-            for (const Obstacle &o : obstacles) {
-                Rectangle collider = o.rect;
-                if (CheckCollisionRecs(playerRect, collider) && invulnerableTimer <= 0.0f) {
+            // Collision detection mechanism
+            for (size_t i = 0; i < obstacleRects.size(); i++) {
+                if (CheckCollisionRecs(playerRect, obstacleRects[i]) && invulnerableTimer <= 0.0f) {
                     died = true;
                     break;
                 }
             }
 
             for (size_t i = 0; i < powerups.size();) {
-                Rectangle orbCollider = powerups[i];
-                if (CheckCollisionRecs(playerRect, orbCollider)) {
+                if (CheckCollisionRecs(playerRect, powerups[i])) {
                     invulnerableTimer = playerInvulnerableDuration;
                     score += 3000.0f;
                     powerups.erase(powerups.begin() + static_cast<int>(i));
@@ -150,7 +154,8 @@ int main(void) {
                 powerupSpawnTimer = 0.0f;
                 invulnerableTimer = 0.0f;
                 laneOffset = 0.0f;
-                obstacles.clear();
+                obstacleRects.clear();
+                obstacleColors.clear();
                 powerups.clear();
             }
         }
@@ -164,8 +169,7 @@ int main(void) {
         // Draw trees
         for (int x = -fmodf(laneOffset, 180.0f); x <= static_cast<float>(screenWidth) + 180.0f; x += 180.0f) {
             DrawCircle(static_cast<int>(x + 80.0f), static_cast<int>(grassBandHeight * 0.5f), 34.0f, Color{63, 128, 49, 255});
-            DrawCircle(static_cast<int>(x + 80.0f), static_cast<int>(screenHeight - grassBandHeight * 0.5f), 34.0f,
-                       Color{63, 128, 49, 255});
+            DrawCircle(static_cast<int>(x + 80.0f), static_cast<int>(screenHeight - grassBandHeight * 0.5f), 34.0f, Color{63, 128, 49, 255});
         }
 
         // Draw lane dash
@@ -178,30 +182,27 @@ int main(void) {
 
         // Draw player
         const Color ringColor = (invulnerableTimer > 0.0f) ? Color{80, 235, 255, 255} : Color{133, 77, 255, 255};
-        DrawCircleLines(static_cast<int>(playerRect.x + playerRect.width * 0.5f), static_cast<int>(playerRect.y + playerRect.height * 0.5f),
-                        playerRect.width * 0.5f, ringColor);
-        DrawCircle(static_cast<int>(playerRect.x + playerRect.width * 0.5f), static_cast<int>(playerRect.y + playerRect.height * 0.5f),
-                   playerRect.width * 0.3f, Color{86, 86, 86, 255});
+        DrawCircleLines(static_cast<int>(playerRect.x + playerRect.width * 0.5f), static_cast<int>(playerRect.y + playerRect.height * 0.5f), playerRect.width * 0.5f, ringColor);
+        DrawCircle(static_cast<int>(playerRect.x + playerRect.width * 0.5f), static_cast<int>(playerRect.y + playerRect.height * 0.5f), playerRect.width * 0.3f, Color{86, 86, 86, 255});
 
-        for (const Obstacle &o : obstacles) {
-            Rectangle carRect = o.rect;
-            const float wheelR = o.rect.height * 0.18f;
+        for (size_t i = 0; i < obstacleRects.size(); i++) {
+            Rectangle carRect = obstacleRects[i];
+            const float wheelR = carRect.height * 0.18f;
+
             DrawCircle(static_cast<int>(carRect.x + carRect.width * 0.20f), static_cast<int>(carRect.y - wheelR * 0.2f), wheelR, BLACK);
             DrawCircle(static_cast<int>(carRect.x + carRect.width * 0.80f), static_cast<int>(carRect.y - wheelR * 0.2f), wheelR, BLACK);
-            DrawCircle(static_cast<int>(carRect.x + carRect.width * 0.20f), static_cast<int>(carRect.y + carRect.height + wheelR * 0.2f), wheelR,
-                       BLACK);
-            DrawCircle(static_cast<int>(carRect.x + carRect.width * 0.80f), static_cast<int>(carRect.y + carRect.height + wheelR * 0.2f), wheelR,
-                       BLACK);
-            DrawRectangleRounded(carRect, 0.10f, 4, o.color);
+            DrawCircle(static_cast<int>(carRect.x + carRect.width * 0.20f), static_cast<int>(carRect.y + carRect.height + wheelR * 0.2f), wheelR, BLACK);
+            DrawCircle(static_cast<int>(carRect.x + carRect.width * 0.80f), static_cast<int>(carRect.y + carRect.height + wheelR * 0.2f), wheelR, BLACK);
+
+            DrawRectangleRounded(carRect, 0.10f, 4, obstacleColors[i]);
         }
 
-        for (const Rectangle &p : powerups) {
-            DrawCircle(static_cast<int>(p.x + p.width / 2.0f), static_cast<int>(p.y + p.height / 2.0f), p.width * 0.5f,
-                       Color{86, 207, 94, 255});
-            DrawText("+", static_cast<int>(p.x + p.width * 0.28f), static_cast<int>(p.y - p.height * 0.08f),
-                     static_cast<int>(p.height * 0.92f), DARKGREEN);
+        for (const Rectangle& p : powerups) {
+            DrawCircle(static_cast<int>(p.x + p.width / 2.0f), static_cast<int>(p.y + p.height / 2.0f), p.width * 0.5f, Color{86, 207, 94, 255});
+            DrawText("+", static_cast<int>(p.x + p.width * 0.28f), static_cast<int>(p.y - p.height * 0.08f), static_cast<int>(p.height * 0.92f), DARKGREEN);
         }
 
+        // Render UI components
         DrawText("LATE TO CLASS!!", 24, 18, 32, RAYWHITE);
         DrawText(TextFormat("Score: %i", static_cast<int>(score)), 24, 58, 26, Color{255, 241, 170, 255});
         DrawText(TextFormat("Speed: %.2f m/s", velocity), 24, 88, 22, RAYWHITE);
@@ -214,8 +215,7 @@ int main(void) {
         if (died) {
             DrawRectangle(0, 0, screenWidth, screenHeight, Color{0, 0, 0, 140});
             DrawText("YOU DIED", screenWidth / 2 - 116, screenHeight / 2 - 74, 50, RED);
-            DrawText(TextFormat("Final Score: %i", static_cast<int>(score)), screenWidth / 2 - 114, screenHeight / 2 - 16, 30,
-                     RAYWHITE);
+            DrawText(TextFormat("Final Score: %i", static_cast<int>(score)), screenWidth / 2 - 114, screenHeight / 2 - 16, 30, RAYWHITE);
             DrawText("Press R / ENTER / Left Click to Restart", screenWidth / 2 - 206, screenHeight / 2 + 36, 24, LIGHTGRAY);
         }
 
