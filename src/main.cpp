@@ -52,6 +52,16 @@ int main(void) {
     const float playerInvulnerableDuration = 2.3f;
     const float slowdownAmount = 80.0f;
     const float minVelocity = 200.0f;
+
+    // Audio
+    InitAudioDevice();
+    Sound deathSound = LoadSound("assets/audio/death.wav");
+    Sound shieldSound = LoadSound("assets/audio/shield.wav");
+    if (shieldSound.frameCount == 0) {
+        TraceLog(LOG_ERROR, "SHIELD SOUND FAILED TO LOAD! Check path: assets/audio/shield.wav");
+    }
+
+    bool deathSoundPlayed = false;
     bool died = false;
     float score = 0.0f;
     float velocity = 370.0f;
@@ -184,6 +194,7 @@ int main(void) {
 
             for (size_t i = 0; i < powerups.size();) {
                 if (CheckCollisionRecs(playerRect, powerups[i])) {
+                    PlaySound(shieldSound);
                     invulnerableTimer = playerInvulnerableDuration;
                     score += 3000.0f;
                     powerups.erase(powerups.begin() + static_cast<int>(i));
@@ -194,6 +205,7 @@ int main(void) {
 
             for (size_t i = 0; i < slowdownPowerups.size();) {
                 if (CheckCollisionRecs(playerRect, slowdownPowerups[i])) {
+                    PlaySound(shieldSound);
                     velocity -= slowdownAmount;
                     if (velocity < minVelocity) velocity = minVelocity;
                     score += 1500.0f;
@@ -204,7 +216,9 @@ int main(void) {
             }
         } else {
             if (IsKeyPressed(KEY_R) || IsKeyPressed(KEY_ENTER) || IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                StopSound(deathSound);
                 died = false;
+                deathSoundPlayed = false;
                 score = 0.0f;
                 velocity = 370.0f;
                 player_row = 0;
@@ -279,6 +293,10 @@ int main(void) {
         }
 
         if (died) {
+            if (!deathSoundPlayed) {
+                PlaySound(deathSound);
+                deathSoundPlayed = true;  // Set to true so it doesn't play next frame
+            }
             DrawRectangle(0, 0, screenWidth, screenHeight, Color{0, 0, 0, 140});
             DrawText("YOU DIED", screenWidth / 2 - 116, screenHeight / 2 - 74, 50, RED);
             DrawText(TextFormat("Final Score: %i", static_cast<int>(score)), screenWidth / 2 - 114, screenHeight / 2 - 16, 30, RAYWHITE);
@@ -288,6 +306,9 @@ int main(void) {
         EndDrawing();
     }
 
+    UnloadSound(deathSound);
+    UnloadSound(shieldSound);
+    CloseAudioDevice();
     CloseWindow();
     return 0;
 }

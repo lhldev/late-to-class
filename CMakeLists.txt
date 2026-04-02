@@ -52,6 +52,12 @@ elseif (APPLE)
     target_link_libraries(${PROJECT_NAME} "-framework IOKit" "-framework Cocoa" "-framework OpenGL")
 endif()
 
+add_custom_target(copy_assets ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/assets ${CMAKE_BINARY_DIR}/assets
+)
+
+add_dependencies(${PROJECT_NAME} copy_assets)
+
 add_custom_target(run
     COMMAND ${CMAKE_COMMAND} -E echo "Building in: ${CMAKE_BUILD_TYPE} mode"
     COMMAND ${CMAKE_BINARY_DIR}/${PROJECT_NAME}
