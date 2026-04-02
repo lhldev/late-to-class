@@ -195,8 +195,8 @@ int main(void) {
             for (size_t i = 0; i < slowdownPowerups.size();) {
                 if (CheckCollisionRecs(playerRect, slowdownPowerups[i])) {
                     velocity -= slowdownAmount;
-                    if (velocity < minVelocity) velocity = minVelocity;  // Cap minimum speed
-                    score += 1500.0f;  // Bonus points for collecting
+                    if (velocity < minVelocity) velocity = minVelocity;
+                    score += 1500.0f;
                     slowdownPowerups.erase(slowdownPowerups.begin() + static_cast<int>(i));
                 } else {
                     i++;
