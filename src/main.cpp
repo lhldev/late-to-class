@@ -24,6 +24,8 @@ using namespace std;
  * - Vehicles (Obstacles)  : Colliding with a vehicle ends the game immediately.
  * - Green Orbs (Power-ups): Collecting an orb grants a temporary shield
  * (invulnerability for 2.3 seconds) and awards 3000 points.
+ * - Blue Orbs (Slowdown)  : Collecting an orb reduces the current velocity
+ * and awards 1500 points.
  *
  * Post-Game:
  * - Restart: Press 'R', 'ENTER', or Left Mouse Click on the "YOU DIED" screen
@@ -46,7 +48,10 @@ int main(void) {
     const float baseAcceleration = 20.0f;
     const float baseSpawnTimeObstacle = 1.0f;
     const float baseSpawnTimePowerup = 3.4f;
+    const float baseSpawnTimeSlowdown = 4.5f;  // New: spawn interval for slowdown powerup
     const float playerInvulnerableDuration = 2.3f;
+    const float slowdownAmount = 80.0f;        // New: how much speed to reduce
+    const float minVelocity = 200.0f;          // New: minimum velocity cap
 
     bool died = false;
     float score = 0.0f;
@@ -56,9 +61,11 @@ int main(void) {
     vector<Rectangle> obstacleRects;
     vector<Color> obstacleColors;
     vector<Rectangle> powerups;
+    vector<Rectangle> slowdownPowerups;  // New: vector for slowdown powerups
 
     float obstacleSpawnTimer = 0.0f;
     float powerupSpawnTimer = 0.0f;
+    float slowdownSpawnTimer = 0.0f;  // New: timer for slowdown spawns
     float invulnerableTimer = 0.0f;
     float laneOffset = 0.0f;
 
@@ -98,9 +105,11 @@ int main(void) {
 
             obstacleSpawnTimer += delta_time;
             powerupSpawnTimer += delta_time;
+            slowdownSpawnTimer += delta_time;  // New: increment slowdown timer
 
             const float obstacleSpawnInterval = baseSpawnTimeObstacle / velocity * 300.0f;
             const float powerupSpawnInterval = baseSpawnTimePowerup / velocity * 800.0f;
+            const float slowdownSpawnInterval = baseSpawnTimeSlowdown / velocity * 800.0f;  // New
 
             laneOffset += velocity * 0.8f * delta_time;
 
@@ -125,11 +134,26 @@ int main(void) {
                 }
             }
 
+            // New: spawn slowdown powerups
+            if (slowdownSpawnTimer >= slowdownSpawnInterval) {
+                slowdownSpawnTimer = 0.0f;
+                if (GetRandomValue(0, 99) < 40) {  // 40% chance to spawn
+                    const int lane = GetRandomValue(-1, 1);
+                    const float orbSize = laneHeight * 0.31f;
+                    slowdownPowerups.push_back({Rectangle{static_cast<float>(screenWidth) + 40.0f,
+                                                          LaneToY(lane, roadTop, laneHeight, orbSize), orbSize, orbSize}});
+                }
+            }
+
             for (size_t i = 0; i < obstacleRects.size(); i++) {
                 obstacleRects[i].x -= velocity * delta_time;
             }
             for (size_t i = 0; i < powerups.size(); i++) {
                 powerups[i].x -= velocity * delta_time * 0.9f;
+            }
+            // New: move slowdown powerups
+            for (size_t i = 0; i < slowdownPowerups.size(); i++) {
+                slowdownPowerups[i].x -= velocity * delta_time * 0.9f;
             }
 
             // Removing entities when out of screen
@@ -144,6 +168,13 @@ int main(void) {
             for (int i = static_cast<int>(powerups.size()) - 1; i >= 0; i--) {
                 if (powerups[i].x + powerups[i].width < 0.0f) {
                     powerups.erase(powerups.begin() + i);
+                }
+            }
+
+            // New: remove off-screen slowdown powerups
+            for (int i = static_cast<int>(slowdownPowerups.size()) - 1; i >= 0; i--) {
+                if (slowdownPowerups[i].x + slowdownPowerups[i].width < 0.0f) {
+                    slowdownPowerups.erase(slowdownPowerups.begin() + i);
                 }
             }
 
@@ -166,6 +197,18 @@ int main(void) {
                     i++;
                 }
             }
+
+            // New: collision detection for slowdown powerups
+            for (size_t i = 0; i < slowdownPowerups.size();) {
+                if (CheckCollisionRecs(playerRect, slowdownPowerups[i])) {
+                    velocity -= slowdownAmount;
+                    if (velocity < minVelocity) velocity = minVelocity;  // Cap minimum speed
+                    score += 1500.0f;  // Bonus points for collecting
+                    slowdownPowerups.erase(slowdownPowerups.begin() + static_cast<int>(i));
+                } else {
+                    i++;
+                }
+            }
         } else {
             if (IsKeyPressed(KEY_R) || IsKeyPressed(KEY_ENTER) || IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                 died = false;
@@ -174,11 +217,13 @@ int main(void) {
                 player_row = 0;
                 obstacleSpawnTimer = 0.0f;
                 powerupSpawnTimer = 0.0f;
+                slowdownSpawnTimer = 0.0f;  // New: reset slowdown timer
                 invulnerableTimer = 0.0f;
                 laneOffset = 0.0f;
                 obstacleRects.clear();
                 obstacleColors.clear();
                 powerups.clear();
+                slowdownPowerups.clear();  // New: clear slowdown powerups
             }
         }
 
@@ -219,10 +264,16 @@ int main(void) {
             DrawRectangleRounded(carRect, 0.10f, 4, obstacleColors[i]);
         }
 
-        // Pointer statement
+        // Pointer statement for green shield powerups
         for (const Rectangle* p = powerups.data(); p != powerups.data() + powerups.size(); p++) {
             DrawCircle(static_cast<int>(p->x + p->width / 2.0f), static_cast<int>(p->y + p->height / 2.0f), p->width * 0.5f, Color{86, 207, 94, 255});
             DrawText("+", static_cast<int>(p->x + p->width * 0.28f), static_cast<int>(p->y - p->height * 0.08f), static_cast<int>(p->height * 0.92f), DARKGREEN);
+        }
+
+        // New: draw blue slowdown powerups
+        for (const Rectangle* p = slowdownPowerups.data(); p != slowdownPowerups.data() + slowdownPowerups.size(); p++) {
+            DrawCircle(static_cast<int>(p->x + p->width / 2.0f), static_cast<int>(p->y + p->height / 2.0f), p->width * 0.5f, Color{66, 135, 245, 255});
+            DrawText("+", static_cast<int>(p->x + p->width * 0.28f), static_cast<int>(p->y - p->height * 0.08f), static_cast<int>(p->height * 0.92f), DARKBLUE);
         }
 
         // Render UI components
