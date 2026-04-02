@@ -48,11 +48,10 @@ int main(void) {
     const float baseAcceleration = 20.0f;
     const float baseSpawnTimeObstacle = 1.0f;
     const float baseSpawnTimePowerup = 3.4f;
-    const float baseSpawnTimeSlowdown = 4.5f;  // New: spawn interval for slowdown powerup
+    const float baseSpawnTimeSlowdown = 4.5f;
     const float playerInvulnerableDuration = 2.3f;
-    const float slowdownAmount = 80.0f;        // New: how much speed to reduce
-    const float minVelocity = 200.0f;          // New: minimum velocity cap
-
+    const float slowdownAmount = 80.0f;
+    const float minVelocity = 200.0f;
     bool died = false;
     float score = 0.0f;
     float velocity = 370.0f;
@@ -61,11 +60,10 @@ int main(void) {
     vector<Rectangle> obstacleRects;
     vector<Color> obstacleColors;
     vector<Rectangle> powerups;
-    vector<Rectangle> slowdownPowerups;  // New: vector for slowdown powerups
-
+    vector<Rectangle> slowdownPowerups;
     float obstacleSpawnTimer = 0.0f;
     float powerupSpawnTimer = 0.0f;
-    float slowdownSpawnTimer = 0.0f;  // New: timer for slowdown spawns
+    float slowdownSpawnTimer = 0.0f;
     float invulnerableTimer = 0.0f;
     float laneOffset = 0.0f;
 
@@ -105,11 +103,10 @@ int main(void) {
 
             obstacleSpawnTimer += delta_time;
             powerupSpawnTimer += delta_time;
-            slowdownSpawnTimer += delta_time;  // New: increment slowdown timer
-
+            slowdownSpawnTimer += delta_time;
             const float obstacleSpawnInterval = baseSpawnTimeObstacle / velocity * 300.0f;
             const float powerupSpawnInterval = baseSpawnTimePowerup / velocity * 800.0f;
-            const float slowdownSpawnInterval = baseSpawnTimeSlowdown / velocity * 800.0f;  // New
+            const float slowdownSpawnInterval = baseSpawnTimeSlowdown / velocity * 800.0f;
 
             laneOffset += velocity * 0.8f * delta_time;
 
@@ -134,7 +131,6 @@ int main(void) {
                 }
             }
 
-            // New: spawn slowdown powerups
             if (slowdownSpawnTimer >= slowdownSpawnInterval) {
                 slowdownSpawnTimer = 0.0f;
                 if (GetRandomValue(0, 99) < 40) {  // 40% chance to spawn
@@ -151,7 +147,6 @@ int main(void) {
             for (size_t i = 0; i < powerups.size(); i++) {
                 powerups[i].x -= velocity * delta_time * 0.9f;
             }
-            // New: move slowdown powerups
             for (size_t i = 0; i < slowdownPowerups.size(); i++) {
                 slowdownPowerups[i].x -= velocity * delta_time * 0.9f;
             }
@@ -171,7 +166,6 @@ int main(void) {
                 }
             }
 
-            // New: remove off-screen slowdown powerups
             for (int i = static_cast<int>(slowdownPowerups.size()) - 1; i >= 0; i--) {
                 if (slowdownPowerups[i].x + slowdownPowerups[i].width < 0.0f) {
                     slowdownPowerups.erase(slowdownPowerups.begin() + i);
@@ -198,7 +192,6 @@ int main(void) {
                 }
             }
 
-            // New: collision detection for slowdown powerups
             for (size_t i = 0; i < slowdownPowerups.size();) {
                 if (CheckCollisionRecs(playerRect, slowdownPowerups[i])) {
                     velocity -= slowdownAmount;
@@ -217,13 +210,13 @@ int main(void) {
                 player_row = 0;
                 obstacleSpawnTimer = 0.0f;
                 powerupSpawnTimer = 0.0f;
-                slowdownSpawnTimer = 0.0f;  // New: reset slowdown timer
+                slowdownSpawnTimer = 0.0f;
                 invulnerableTimer = 0.0f;
                 laneOffset = 0.0f;
                 obstacleRects.clear();
                 obstacleColors.clear();
                 powerups.clear();
-                slowdownPowerups.clear();  // New: clear slowdown powerups
+                slowdownPowerups.clear();
             }
         }
 
@@ -270,7 +263,6 @@ int main(void) {
             DrawText("+", static_cast<int>(p->x + p->width * 0.28f), static_cast<int>(p->y - p->height * 0.08f), static_cast<int>(p->height * 0.92f), DARKGREEN);
         }
 
-        // New: draw blue slowdown powerups
         for (const Rectangle* p = slowdownPowerups.data(); p != slowdownPowerups.data() + slowdownPowerups.size(); p++) {
             DrawCircle(static_cast<int>(p->x + p->width / 2.0f), static_cast<int>(p->y + p->height / 2.0f), p->width * 0.5f, Color{66, 135, 245, 255});
             DrawText("+", static_cast<int>(p->x + p->width * 0.28f), static_cast<int>(p->y - p->height * 0.08f), static_cast<int>(p->height * 0.92f), DARKBLUE);
