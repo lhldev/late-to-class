@@ -45,7 +45,7 @@ int main(void) {
     const int screenHeight = 680;
     const float playerSize = 56.0f;
 
-    const float baseAcceleration = 20.0f;
+    const float baseAcceleration = 40.0f;
     const float baseSpawnTimeObstacle = 1.0f;
     const float baseSpawnTimePowerup = 3.4f;
     const float baseSpawnTimeSlowdown = 4.5f;
@@ -53,8 +53,13 @@ int main(void) {
     const float slowdownAmount = 80.0f;
     const float minVelocity = 200.0f;
 
-    // Audio
+    // SOUND EFFECT AND BACKGROUND MUSIC
+
     InitAudioDevice();
+    Music bgMusic = LoadMusicStream("assets/audio/backg.mp3");
+    SetMusicVolume(bgMusic, 0.3f);
+    PlayMusicStream(bgMusic);
+
     Sound deathSound = LoadSound("assets/audio/death.wav");
     Sound shieldSound = LoadSound("assets/audio/shield.wav");
     if (shieldSound.frameCount == 0) {
@@ -66,7 +71,6 @@ int main(void) {
     float score = 0.0f;
     float velocity = 370.0f;
     int player_row = 0;
-
     vector<Rectangle> obstacleRects;
     vector<Color> obstacleColors;
     vector<Rectangle> powerups;
@@ -100,6 +104,7 @@ int main(void) {
         const Rectangle playerRect{playerX, LaneToY(player_row, roadTop, laneHeight, playerSize), playerSize, playerSize};
 
         if (!died) {
+            UpdateMusicStream(bgMusic);
             if (IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_W)) {
                 if (player_row > -1) player_row--;
             } else if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S)) {
@@ -107,7 +112,7 @@ int main(void) {
             }
 
             // Nonlinear acceleration curve to increase difficulty over time.
-            const float nonlinearAcceleration = baseAcceleration * exp(-score * 0.00005f);
+            const float nonlinearAcceleration = baseAcceleration * exp(-velocity * 0.004f);
             velocity += nonlinearAcceleration * delta_time;
             score += velocity * delta_time;
 
@@ -187,7 +192,7 @@ int main(void) {
             // Collision detection mechanism
             for (size_t i = 0; i < obstacleRects.size(); i++) {
                 if (CheckCollisionRecs(playerRect, obstacleRects[i]) && invulnerableTimer <= 0.0f) {
-                    died = true;
+                    // died = true;
                     break;
                 }
             }
@@ -306,6 +311,7 @@ int main(void) {
         EndDrawing();
     }
 
+    UnloadMusicStream(bgMusic);
     UnloadSound(deathSound);
     UnloadSound(shieldSound);
     CloseAudioDevice();
