@@ -192,7 +192,7 @@ int main(void) {
             // Collision detection mechanism
             for (size_t i = 0; i < obstacleRects.size(); i++) {
                 if (CheckCollisionRecs(playerRect, obstacleRects[i]) && invulnerableTimer <= 0.0f) {
-                    // died = true;
+                    died = true;
                     break;
                 }
             }
